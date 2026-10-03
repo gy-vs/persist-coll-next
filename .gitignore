@@ -1,0 +1,23 @@
+.*.haste_cache.*
+node_modules
+npm-debug.log
+yarn-error.log
+.DS_Store
+*~
+*.swp
+.idea
+*.iml
+TODO
+/website/.next
+/website/out
+/website/public/sitemap*.xml
+/website/public/robots.txt
+/gh-pages
+/npm
+/dist
+
+# local secrets
+.env
+.env.*
+*.pem
+*.key
