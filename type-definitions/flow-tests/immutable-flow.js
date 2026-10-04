@@ -3,6 +3,7 @@
 // Flow might not complain about an instance of (what it thinks is) T to be assigned to T<K, V>
 
 import Immutable, {
+  ANY_KEY,
   List,
   Map,
   Stack,
@@ -1339,3 +1340,42 @@ const state = initialState();
 (state.setIn(['nest', 'deepNest', 'foo'], 'string'): State);
 // $FlowExpectedError[incompatible-call]
 (state.setIn(['nest', 'deepNest', 'unknownField'], 5): State);
+
+// ANY_KEY wildcard key paths
+
+{
+  const state = Map({
+    users: List([Map({ name: 'a' }), Map({ name: 'b' })]),
+  });
+  (state.updateIn(
+    ['users', ANY_KEY, 'name'],
+    name => String(name)
+  ): typeof state);
+  (state.setIn(
+    ['users', ANY_KEY, 'name'],
+    'x'
+  ): typeof state);
+  (state.removeIn(['users', ANY_KEY, 'name']): typeof state);
+
+  const raw = { users: [{ name: 'a' }] };
+  (setIn(raw, ['users', ANY_KEY, 'name'], 'x'): typeof raw);
+  (removeIn(raw, ['users', ANY_KEY, 'name']): typeof raw);
+  (updateIn(
+    raw,
+    ['users', ANY_KEY, 'name'],
+    name => String(name)
+  ): typeof raw);
+
+  // Multiple wildcards in one path
+  (state.setIn(
+    ['orders', ANY_KEY, 'items', ANY_KEY, 'checked'],
+    true
+  ): typeof state);
+
+  // A wildcard at the root
+  (Map({ a: 1 }).setIn([ANY_KEY], 2): Map<string, number>);
+
+  // ANY_KEY is not an ordinary key
+  // $FlowExpectedError[incompatible-type]
+  const notAKey: string = ANY_KEY;
+}

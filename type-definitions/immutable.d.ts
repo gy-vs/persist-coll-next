@@ -93,6 +93,14 @@
  */
 
 declare namespace Immutable {
+  /**
+   * The branded, opaque type of the {@link ANY_KEY} key path wildcard.
+   * Ordinary keys such as strings and numbers are not assignable to it.
+   */
+  interface ANY_KEY {
+    readonly '@@__IMMUTABLE_ANY_KEY__@@': true;
+  }
+
   /** @ignore */
   type OnlyObject<T> = Extract<T, object>;
 
@@ -5429,6 +5437,27 @@ declare namespace Immutable {
     : never;
 
   /**
+   * A wildcard for use in a key path with `setIn()`, `updateIn()`, and
+   * `removeIn()` (and their functional variants) which stands in for *every*
+   * key of the collection at that level of the path. The remainder of the
+   * path is applied to each child in turn.
+   *
+   * <!-- runkit:activate -->
+   * ```js
+   * const { fromJS, ANY_KEY } = require('immutable')
+   * const state = fromJS({ users: [{ name: 'a' }, { name: 'b' }] })
+   * state.updateIn(['users', ANY_KEY, 'name'], name => name.toUpperCase())
+   * // Map { "users": List [ Map { "name": "A" }, Map { "name": "B" } ] }
+   * ```
+   *
+   * Unlike ordinary key paths, a path containing `ANY_KEY` never creates
+   * missing intermediate collections: children whose path does not resolve to
+   * an existing value are skipped, and if no value changes, the original
+   * collection is returned.
+   */
+  const ANY_KEY: ANY_KEY;
+
+  /**
    * Value equality check with semantics similar to `Object.is`, but treats
    * Immutable `Collection`s as values, equal if the second `Collection` includes
    * equivalent values.
@@ -5911,6 +5940,11 @@ declare namespace Immutable {
    * removeIn(original, ['x', 'y', 'z']) // { x: { y: {}}}
    * console.log(original) // { x: { y: { z: 123 }}}
    * ```
+   *
+   * A segment of the key path may be {@link ANY_KEY} to apply the remainder
+   * of the path to every child at that level. In that case, branches whose
+   * path does not resolve are skipped and no intermediate collections are
+   * created.
    */
   function removeIn<C>(collection: C, keyPath: Iterable<unknown>): C;
 
@@ -5928,6 +5962,11 @@ declare namespace Immutable {
    * setIn(original, ['x', 'y', 'z'], 456) // { x: { y: { z: 456 }}}
    * console.log(original) // { x: { y: { z: 123 }}}
    * ```
+   *
+   * A segment of the key path may be {@link ANY_KEY} to apply the remainder
+   * of the path to every child at that level. In that case, branches whose
+   * path does not resolve are skipped and no intermediate collections are
+   * created.
    */
   function setIn<C>(
     collection: C,
@@ -5949,6 +5988,11 @@ declare namespace Immutable {
    * updateIn(original, ['x', 'y', 'z'], val => val * 6) // { x: { y: { z: 738 }}}
    * console.log(original) // { x: { y: { z: 123 }}}
    * ```
+   *
+   * A segment of the key path may be {@link ANY_KEY} to apply the remainder
+   * of the path to every child at that level. In that case, branches whose
+   * path does not resolve are skipped and no intermediate collections are
+   * created.
    */
   function updateIn<C>(
     collection: C,

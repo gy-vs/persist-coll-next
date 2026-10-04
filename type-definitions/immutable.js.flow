@@ -27,6 +27,44 @@ type PlainObjInput<K, V> = { +[key: K]: V, __proto__: null };
 
 type K<T> = $Keys<T>;
 
+/**
+ * Opaque type of the `ANY_KEY` key path wildcard.
+ */
+type ANY_KEY_TYPE = {| +'@@__IMMUTABLE_ANY_KEY__@@': true |};
+
+/**
+ * A wildcard for use in a key path with `setIn()`, `updateIn()`, and
+ * `removeIn()` (and their functional variants) which stands in for *every*
+ * key of the collection at that level of the path.
+ */
+declare var ANY_KEY: ANY_KEY_TYPE;
+
+// Tuple key paths containing at least one `ANY_KEY` wildcard. Flow 0.160 has
+// no tuple rest elements, so these precise shapes mirror the fixed depths of
+// the other *In overloads.
+type WildcardKeyPath =
+  | [ANY_KEY_TYPE]
+  | [ANY_KEY_TYPE, mixed]
+  | [mixed, ANY_KEY_TYPE]
+  | [ANY_KEY_TYPE, mixed, mixed]
+  | [mixed, ANY_KEY_TYPE, mixed]
+  | [mixed, mixed, ANY_KEY_TYPE]
+  | [ANY_KEY_TYPE, mixed, mixed, mixed]
+  | [mixed, ANY_KEY_TYPE, mixed, mixed]
+  | [mixed, mixed, ANY_KEY_TYPE, mixed]
+  | [mixed, mixed, mixed, ANY_KEY_TYPE]
+  | [ANY_KEY_TYPE, mixed, mixed, mixed, mixed]
+  | [mixed, ANY_KEY_TYPE, mixed, mixed, mixed]
+  | [mixed, mixed, ANY_KEY_TYPE, mixed, mixed]
+  | [mixed, mixed, mixed, ANY_KEY_TYPE, mixed]
+  | [mixed, mixed, mixed, mixed, ANY_KEY_TYPE]
+  | [ANY_KEY_TYPE, mixed, mixed, mixed, mixed, mixed]
+  | [mixed, ANY_KEY_TYPE, mixed, mixed, mixed, mixed]
+  | [mixed, mixed, ANY_KEY_TYPE, mixed, mixed, mixed]
+  | [mixed, mixed, mixed, ANY_KEY_TYPE, mixed, mixed]
+  | [mixed, mixed, mixed, mixed, ANY_KEY_TYPE, mixed]
+  | [mixed, mixed, mixed, mixed, mixed, ANY_KEY_TYPE];
+
 // Helper types to extract the "keys" and "values" use by the *In() methods.
 type $KeyOf<C> = $Call<
   (<K>(?_Collection<K, mixed>) => K) &
@@ -784,6 +822,18 @@ declare class SetSeq<+T> extends Seq<T, T> mixins SetCollection<T> {
 }
 
 declare class UpdatableInCollection<K, +V> {
+  // Wildcard keyPaths containing `ANY_KEY` (declared first so they take
+  // precedence over the precise tuple overloads below)
+  setIn(keyPath: WildcardKeyPath, value: mixed): this;
+  deleteIn(keyPath: WildcardKeyPath): this;
+  removeIn(keyPath: WildcardKeyPath): this;
+  updateIn(
+    keyPath: WildcardKeyPath,
+    notSetValue: mixed,
+    updater: (value: mixed) => mixed
+  ): this;
+  updateIn(keyPath: WildcardKeyPath, updater: (value: mixed) => mixed): this;
+
   setIn<S>(keyPath: [], value: S): S;
   setIn(keyPath: [K], value: V): this;
   setIn<K2: $KeyOf<V>, S: $ValOf<V, K2>>(keyPath: [K, K2], value: S): this;
@@ -1745,6 +1795,21 @@ declare class RecordInstance<T: Object = Object> {
   remove<K: $Keys<T>>(key: K): this & $ReadOnly<T>;
   clear(): this & $ReadOnly<T>;
 
+  // Wildcard keyPaths containing `ANY_KEY` (declared first so they take
+  // precedence over the precise tuple overloads below)
+  setIn(keyPath: WildcardKeyPath, value: mixed): this & $ReadOnly<T>;
+  deleteIn(keyPath: WildcardKeyPath): this & $ReadOnly<T>;
+  removeIn(keyPath: WildcardKeyPath): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: WildcardKeyPath,
+    notSetValue: mixed,
+    updater: (value: mixed) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: WildcardKeyPath,
+    updater: (value: mixed) => mixed
+  ): this & $ReadOnly<T>;
+
   setIn<S>(keyPath: [], value: S): S;
   setIn<K: $Keys<T>, S: $ValOf<T, K>>(
     keyPath: [K],
@@ -2062,6 +2127,26 @@ declare function getIn<
 
 declare function hasIn(collection: Object, keyPath: Iterable<mixed>): boolean;
 
+// Wildcard keyPaths containing `ANY_KEY` (declared before the precise tuple
+// overloads so wildcard tuples resolve to these loose signatures)
+declare function setIn<C>(
+  collection: C,
+  keyPath: WildcardKeyPath,
+  value: mixed
+): C;
+declare function removeIn<C>(collection: C, keyPath: WildcardKeyPath): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: WildcardKeyPath,
+  updater: (value: mixed) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: WildcardKeyPath,
+  notSetValue: mixed,
+  updater: (value: mixed) => mixed
+): C;
+
 declare function removeIn<C>(collection: C, keyPath: []): void;
 declare function removeIn<C, K: $KeyOf<C>>(collection: C, keyPath: [K]): C;
 declare function removeIn<C, K: $KeyOf<C>, K2: $KeyOf<$ValOf<C, K>>>(
@@ -2351,6 +2436,7 @@ export {
   mergeWith,
   mergeDeep,
   mergeDeepWith,
+  ANY_KEY,
 };
 
 export default {
@@ -2367,6 +2453,7 @@ export default {
   Record,
   Set,
   Stack,
+  ANY_KEY,
 
   fromJS,
   is,
