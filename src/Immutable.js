@@ -11,6 +11,7 @@ import { Range } from './Range';
 import { Repeat } from './Repeat';
 import { is } from './is';
 import { fromJS } from './fromJS';
+import { ANY_KEY } from './ANY_KEY';
 
 import isPlainObject from './utils/isPlainObj';
 
@@ -69,6 +70,7 @@ export {
   Repeat,
   is,
   fromJS,
+  ANY_KEY,
   hash,
   isImmutable,
   isCollection,

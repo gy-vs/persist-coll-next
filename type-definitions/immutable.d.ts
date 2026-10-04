@@ -888,7 +888,7 @@ declare namespace Immutable {
   }
 
   // Loosely based off of this work.
-  // 
+  //
 
   /** @ignore */
   type GetMapType<S> = S extends MapOf<infer T> ? T : S;
@@ -5862,6 +5862,26 @@ declare namespace Immutable {
     notSetValue: NSV,
     updater: (value: V | NSV) => V
   ): { [key: string]: V };
+
+  /**
+   * A wildcard segment for use in the `keyPath` of `updateIn`, `setIn` and
+   * `removeIn` (both as instance methods and as standalone functions). It
+   * stands for every existing child at that level of the path.
+   *
+   * Unlike an ordinary path, a path containing `ANY_KEY` never creates
+   * intermediate values: children that do not exist or are not collections
+   * are simply skipped, and when nothing changes the original collection is
+   * returned.
+   *
+   * <!-- runkit:activate -->
+   * ```js
+   * const { fromJS, setIn, ANY_KEY } = require('immutable')
+   * const state = fromJS({ orders: [{ items: [{ checked: false }] }] })
+   * setIn(state, ['orders', ANY_KEY, 'items', ANY_KEY, 'checked'], true)
+   * // Map { "orders": List [ Map { "items": List [ Map { "checked": true } ] } ] }
+   * ```
+   */
+  const ANY_KEY: '@@__IMMUTABLE_ANY__@@';
 
   /**
    * Returns the value at the provided key path starting at the provided

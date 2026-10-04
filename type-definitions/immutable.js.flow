@@ -27,6 +27,11 @@ type PlainObjInput<K, V> = { +[key: K]: V, __proto__: null };
 
 type K<T> = $Keys<T>;
 
+// Type of the `ANY_KEY` wildcard segment usable inside *In() keyPaths. It is
+// a distinct string literal, so tuples that contain it cannot match the
+// ordinary (non-wildcard) keyPath overloads.
+type $AnyKey = '@@__IMMUTABLE_ANY__@@';
+
 // Helper types to extract the "keys" and "values" use by the *In() methods.
 type $KeyOf<C> = $Call<
   (<K>(?_Collection<K, mixed>) => K) &
@@ -810,6 +815,9 @@ declare class UpdatableInCollection<K, +V> {
     keyPath: [K, K2, K3, K4, K5],
     value: S
   ): this;
+  // Wildcard keyPaths containing ANY_KEY (and arbitrary depth) cannot be
+  // statically resolved.
+  setIn(keyPath: Array<mixed>, value: mixed): this;
 
   deleteIn(keyPath: []): void;
   deleteIn(keyPath: [K]): this;
@@ -854,7 +862,139 @@ declare class UpdatableInCollection<K, +V> {
   >(
     keyPath: [K, K2, K3, K4, K5]
   ): this;
+  // Wildcard keyPaths containing ANY_KEY cannot be statically resolved.
+  deleteIn(keyPath: Array<mixed>): this;
+  removeIn(keyPath: Array<mixed>): this;
 
+  // Wildcard keyPaths containing ANY_KEY. The marked segment
+  // must be the ANY_KEY constant; other segments stay untyped (mixed),
+  // so paths with several wildcard segments are covered as well.
+  updateIn(keyPath: [$AnyKey], updater: (value: any) => mixed): this;
+  updateIn(keyPath: [$AnyKey, mixed], updater: (value: any) => mixed): this;
+  updateIn(keyPath: [mixed, $AnyKey], updater: (value: any) => mixed): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this;
   updateIn<U>(keyPath: [], notSetValue: mixed, updater: (value: this) => U): U;
   updateIn<U>(keyPath: [], updater: (value: this) => U): U;
   updateIn<NSV>(keyPath: [K], notSetValue: NSV, updater: (value: V) => V): this;
@@ -1784,6 +1924,8 @@ declare class RecordInstance<T: Object = Object> {
     keyPath: [K, K2, K3, K4, K5],
     value: S
   ): this & $ReadOnly<T>;
+  // Wildcard keyPaths containing ANY_KEY cannot be statically resolved.
+  setIn(keyPath: Array<mixed>, value: mixed): this & $ReadOnly<T>;
 
   deleteIn(keyPath: []): void;
   deleteIn<K: $Keys<T>>(keyPath: [K]): this & $ReadOnly<T>;
@@ -1844,7 +1986,148 @@ declare class RecordInstance<T: Object = Object> {
   >(
     keyPath: [K, K2, K3, K4, K5]
   ): this & $ReadOnly<T>;
+  // Wildcard keyPaths containing ANY_KEY cannot be statically resolved.
+  deleteIn(keyPath: Array<mixed>): this & $ReadOnly<T>;
+  removeIn(keyPath: Array<mixed>): this & $ReadOnly<T>;
 
+  // Wildcard keyPaths containing ANY_KEY. The marked segment
+  // must be the ANY_KEY constant; other segments stay untyped (mixed),
+  // so paths with several wildcard segments are covered as well.
+  updateIn(
+    keyPath: [$AnyKey],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
+  updateIn(
+    keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+    notSetValue: mixed,
+    updater: (value: any) => mixed
+  ): this & $ReadOnly<T>;
   updateIn<U>(
     keyPath: [],
     notSetValue: mixed,
@@ -1946,7 +2229,6 @@ declare class RecordInstance<T: Object = Object> {
       value: $ValOf<$ValOf<$ValOf<$ValOf<$ValOf<T, K>, K2>, K3>, K4>, K5>
     ) => S
   ): this & $ReadOnly<T>;
-
   mergeIn(
     keyPath: Iterable<mixed>,
     ...collections: Array<any>
@@ -2062,6 +2344,9 @@ declare function getIn<
 
 declare function hasIn(collection: Object, keyPath: Iterable<mixed>): boolean;
 
+// Wildcard segment usable inside keyPaths of setIn, removeIn and updateIn.
+declare var ANY_KEY: '@@__IMMUTABLE_ANY__@@';
+
 declare function removeIn<C>(collection: C, keyPath: []): void;
 declare function removeIn<C, K: $KeyOf<C>>(collection: C, keyPath: [K]): C;
 declare function removeIn<C, K: $KeyOf<C>, K2: $KeyOf<$ValOf<C, K>>>(
@@ -2098,6 +2383,8 @@ declare function removeIn<
   collection: C,
   keyPath: [K, K2, K3, K4, K5]
 ): C;
+
+declare function removeIn<C>(collection: C, keyPath: Array<mixed>): C;
 
 declare function setIn<S>(collection: Object, keyPath: [], value: S): S;
 declare function setIn<C, K: $KeyOf<C>, S: $ValOf<C, K>>(
@@ -2150,6 +2437,179 @@ declare function setIn<
   collection: C,
   keyPath: [K, K2, K3, K4, K5],
   value: S
+): C;
+// Wildcard keyPaths (ANY_KEY) cannot be statically resolved.
+declare function setIn<C>(
+  collection: C,
+  keyPath: Array<mixed>,
+  value: mixed
+): C;
+
+// Wildcard keyPaths containing ANY_KEY (depth up to 5, like the overloads above).
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, $AnyKey],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, $AnyKey],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [$AnyKey, mixed, mixed, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, $AnyKey, mixed, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, $AnyKey, mixed, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, $AnyKey, mixed],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
+): C;
+declare function updateIn<C>(
+  collection: C,
+  keyPath: [mixed, mixed, mixed, mixed, $AnyKey],
+  notSetValue: mixed,
+  updater: (value: any) => mixed
 ): C;
 
 declare function updateIn<C, S>(
@@ -2329,6 +2789,7 @@ export {
   fromJS,
   is,
   hash,
+  ANY_KEY,
   isImmutable,
   isCollection,
   isKeyed,
@@ -2371,6 +2832,7 @@ export default {
   fromJS,
   is,
   hash,
+  ANY_KEY,
 
   isImmutable,
   isCollection,
